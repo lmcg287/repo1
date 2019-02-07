@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+	<style>
+		* {
+			margin:0;
+			padding:0;
+		}
+	</style>
+</head>
+<body>
+	<canvas id = "canvas" width = '600' height = '600'></canvas>
+	<!-- <progress id="progress" value='1' max='100'></progress> -->
+	<script>
+		var canvas = document.getElementById('canvas');
+		var ctx = canvas.getContext('2d');
+		var x = 0;
+		var y = 0;
+		var count = 1;
+		var count2 = 0;
+		var pro = 100 / (36 * 8);
+		var proTotal = 0;
+		var c = 0;
+					
+
+		var enemySprites = 
+		{	
+			bottomleft: 
+			{
+				start: [],
+				attack: [],
+				move: [],
+				die1: [],
+				die2: []
+				},
+			left: 
+			{	start: [],
+				attack: [],
+				move: [],
+				die1: [],
+				die2: []	
+			},
+			topleft: 
+			{
+				start: [],
+				attack: [],
+				move: [],
+				die1: [],
+				die2: []
+			},
+			top: 
+			{
+				start: [],
+				attack: [],
+				move: [],
+				die1: [],
+				die2: []
+			},
+			topright: 
+			{
+				start: [],
+				attack: [],
+				move: [],
+				die1: [],
+				die2: []
+			},
+			right: 
+			{
+				start: [],
+				attack: [],
+				move: [],
+				die1: [],
+				die2: []
+			},
+			bottomright: 
+			{
+				start: [],
+				attack: [],
+				move: [],
+				die1: [],
+				die2: []
+			},
+			bottom: 
+			{
+				start: [],
+				attack: [],
+				move: [],
+				die1: [],
+				die2:[]
+			}
+		}
+		for (el in enemySprites) {
+			for (var i = 0; i < 36; i++) {
+				var imgVar = new Image();
+				if (count * 36 - 36 + i >= 100) {imgVar.src =  'enemy/tile' + count2 + '.png';}
+				else if (count * 36 - 36 + i >= 10) {imgVar.src =  'enemy/tile0' + count2 +'.png';}
+				else if ((count * 36 - 36) + i >= 0) {imgVar.src =  'enemy/tile00' + count2  +'.png';}
+								enemySprites[el].die2.push(imgVar);
+								count2++;
+								proTotal += pro;
+								//var progress = document.getElementById('progress');
+								//progress.value = `${Math.floor(proTotal)}` ;
+								// updateProgress(proTotal);
+								// console.log(progress.value)
+								//if (proTotal.value == '100') {progress.style.display = 'hidden';}
+			}
+			count += 1;
+			enemySprites[el].start = enemySprites[el].die2.splice(0, 4);
+			enemySprites[el].move = enemySprites[el].die2.splice(0, 8);
+			enemySprites[el].attack = enemySprites[el].die2.splice(0, 8);
+			enemySprites[el].die1 = enemySprites[el].die2.splice(0, 8);
+			// console.log(enemySprites[el].move)
+			// console.log(enemySprites[el].die1)
+			// console.log(enemySprites[el].die2)
+
+
+		}
+		// function updateProgress(x) {
+		// 	var prog = document.getElementById('progress');
+		// 	progress.value = `${x}`
+		// }
+		
+		var Enemy = function() {
+			this.angle;
+			this.x;
+			this.y;
+			this.alive = true;
+			this.speed = 4;
+			this.img = 'left';
+			this.state = 'move'
+
+
+			this.spawn = function() {
+
+					if (this.x == undefined) {
+
+			
+								 this.random = Math.floor(Math.random() * 4);
+				
+								if (this.random == 0) {
+				
+									this.x = -128;
+									this.y = Math.floor(Math.random() * (canvas.height + 256) - 128);
+								}
+								else if (this.random == 1) {
+				
+									this.x = Math.floor(Math.random() * canvas.width); 
+									this.y = canvas.height;
+								}
+								else if (this. random == 2) {
+				
+									this.x = Math.floor(Math.random() * (canvas.width + 256) - 128); 
+									this.y = -128;
+								}
+								else if (this.random == 3) {
+				
+									this.x = canvas.width;
+									this.y = Math.floor(Math.random() * canvas.height); 
+								}
+					}
+			}
+			this.move = function() {
+						// console.log('x=====> ' + this.vectorX)
+						// console.log('y=====> ' + this.vectorY)
+						
+
+							this.vectorX = canvas.width / 2 - this.x;
+							this.vectorY = canvas.height / 2 - this.y;
+							this.distance = Math.sqrt(this.vectorX ** 2 + this.vectorY ** 2);
+							this.uX = this.vectorX / this.distance;
+							this.uY = this.vectorY / this.distance;
+							this.angle = Math.atan2(this.vectorY, this.vectorX) * 180 / Math.PI;
+							this.c = 0;
+							if (this.x <= 0) {this.img = 'right'; this.x += this.speed;}
+							if (this.x >= canvas.width - 128) {this.img = 'left'; this.x -= this.speed;}
+							if (this.y <= 0) {this.img = 'bottom'; this.y += this.speed;}
+							if (this.y >= canvas.height -128) {this.img = 'top'; this.y -= this.speed;}
+							else {						
+							if (this.vectorX === this.vectorY) {
+
+								if (this.angle == 45)  { this.img = 'bottomright';this.x += this.speed;this.y += this.speed; }
+					
+								if (this.angle == 135) { this.img = 'bottomleft';this.x -= this.speed;this.y += this.speed; }
+					
+								if (this.angle == -45) { this.img = 'topright';this.x += this.speed;this.y -= this.speed; }
+					
+								if (this.angle == -135) { this.img = 'topleft';this.x -= this.speed;this.y -= this.speed; }
+
+								if (this.angle == 180) {this.img = 'left'; this.x -= this.speed;}
+							}
+							if (this.vectorX > this.vectorY) {
+
+								if (canvas.width / 2 > this.x) { 
+									this.x += this.speed; 
+									this.img = 'right'; 
+								} else if (canvas.width / 2 < this.x) {
+
+								this.img = 'left';
+								this.x -= this.speed;
+									}
+							} 
+									else if (this.vectorY > this.vectorX) {
+
+										if (canvas.height / 2 > this.y) {
+											//console.log(this)
+											this.y += this.speed;
+											this.img = 'bottom';
+										} else if (canvas.height / 2 < this.y) {
+										 this.img = 'top';
+										 this.y -= this.speed;
+										}
+									}
+									// console.log('c ' +canvas.width / 2)
+									// console.log('x '+this.x)
+									if (this.distance < 64) {
+										//console.log('test')
+										this.state = 'attack';
+									}
+						}
+
+			}
+			this.draw = function() {
+				//console.log(c)
+
+				draw(enemySprites[this.img][this.state][c], this.x - 64, this.y - 64);
+				c++;
+				if (c >= enemySprites[this.img][this.state].length) {
+					c = 0;
+				}
+			}
+			this.sounds = function() {
+			}
+ 		}
+ 		var zombie = [];
+
+ 		setInterval(()=> {
+ 			var z = new Enemy();
+ 			zombie.push(z);
+ 		}, 5000)
+
+ 		setInterval(()=> {loop();}, 350);
+
+ 		function loop() {
+ 			clear();
+ 			for (var i = 0; i < zombie.length; i++) {
+ 			
+ 					ctx.fillRect(canvas.width / 2, canvas.height / 2, 20, 20);
+ 					zombie[i].spawn();
+ 					zombie[i].move();
+ 					zombie[i].draw()
+ 			}
+ 		}
+ 		function clear() {
+ 			ctx.clearRect(0, 0, canvas.width, canvas.height);
+ 		}
+ 		function draw(img, x, y) {
+
+ 			ctx.drawImage(img, x, y)
+ 		}
+
+	</script>
+</body>
+</html>
